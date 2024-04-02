@@ -1,7 +1,6 @@
 package ui;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
-import cn.hutool.captcha.LineCaptcha;
 import java.sql.*;
 
 import javax.swing.*;
@@ -18,12 +17,10 @@ public class LoginJFrame extends JFrame implements MouseListener
     String name;
     String pwd;
     String veri;
-    JDialog dialog = new JDialog();
     Box row1 = Box.createHorizontalBox();
     Box row2 = Box.createHorizontalBox();
     Box row3 = Box.createHorizontalBox();
     Box row4 = Box.createHorizontalBox();
-    Box row5 = Box.createHorizontalBox();
     Box col = Box.createVerticalBox();
 
     JPanel panel1 = new JPanel(new BorderLayout());
@@ -85,22 +82,22 @@ public class LoginJFrame extends JFrame implements MouseListener
                    ResultSet resultSet = state.executeQuery();
                    if(!resultSet.next())
                    {
-                       System.out.println("该账号不存在！");
                        JOptionPane.showMessageDialog(null,"您输入的账号不存在！","账号不存在",JOptionPane.ERROR_MESSAGE);
                        return;
 
                    }
                   if(!Objects.equals(pwd, resultSet.getString("password")))
                   {
-                      System.out.println("输入的密码错误！");
+
                       JOptionPane.showMessageDialog(null,"您输入的密码不正确！","密码错误",JOptionPane.ERROR_MESSAGE);
                       return;
                   }
                    if(!captcha.verify(veri))
                    {
-                       System.out.println("输入的验证码错误！");
+
                        JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
                        veri_update();
+                       return;
                    }
                    dispose();
                    new UserJFrame();
@@ -115,7 +112,17 @@ public class LoginJFrame extends JFrame implements MouseListener
         {
             public void actionPerformed(ActionEvent e)
             {
-                new RegisterJFrame();
+                try
+                {
+                    new RegisterJFrame();
+                } catch (SQLException ex)
+                {
+                    throw new RuntimeException(ex);
+                } catch (ClassNotFoundException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+
                 dispose();
             }
         });
