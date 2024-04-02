@@ -35,13 +35,13 @@ public class UserJFrame extends JFrame
         this.setSize(900,700);
         this.setTitle("图书馆管理系统");
         this.setLayout(null);
-
+        this.setLocationRelativeTo(null);
 
         this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
 
 
         title.setFont(new Font("黑体",Font.BOLD,50));
-        this.add(title);
+//        this.add(title);
 
 
         panel1.setBounds(0,0,900,150);

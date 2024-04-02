@@ -2,17 +2,23 @@ package ui;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.CircleCaptcha;
 import cn.hutool.captcha.LineCaptcha;
+import java.sql.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Objects;
 
 
 public class LoginJFrame extends JFrame implements MouseListener
 {
+    Connection connection;
+    Statement statement;
+    String sql;
     String name;
     String pwd;
     String veri;
+    JDialog dialog = new JDialog();
     Box row1 = Box.createHorizontalBox();
     Box row2 = Box.createHorizontalBox();
     Box row3 = Box.createHorizontalBox();
@@ -20,7 +26,10 @@ public class LoginJFrame extends JFrame implements MouseListener
     Box row5 = Box.createHorizontalBox();
     Box col = Box.createVerticalBox();
 
-    JLabel title = new JLabel("欢迎使用图书馆管理系统");
+    JPanel panel1 = new JPanel(new BorderLayout());
+    JPanel panel2 = new JPanel();
+
+    JLabel title = new JLabel("欢迎使用图书馆管理系统",JLabel.CENTER);
     JLabel name_label = new JLabel("您的账号:");
     JLabel pwd_label = new JLabel("您的密码:");
     JLabel veri_label = new JLabel("验证码:");
@@ -29,15 +38,17 @@ public class LoginJFrame extends JFrame implements MouseListener
     JTextField veri_text = new JTextField(10);
     JButton login = new JButton("登录");
     JButton register = new JButton("注册");
-    Font font = new Font("宋体",Font.BOLD,25);
+    Font font = new Font("宋体",Font.BOLD,30);
     CircleCaptcha captcha;
     Image image;
     ImageIcon imageIcon;
     JLabel label;
-    public LoginJFrame()
-    {
-        init();
+    public LoginJFrame() throws SQLException, ClassNotFoundException
 
+    {
+
+        init();
+        connect();
         veri_init();
 
         initComponent();
@@ -49,13 +60,54 @@ public class LoginJFrame extends JFrame implements MouseListener
            public void actionPerformed(ActionEvent e)
            {
                name = name_text.getText();
+               if(name.isEmpty())
+               {
+                   JOptionPane.showMessageDialog(null,"您输入的账号不能为空！","账号不能为空",JOptionPane.WARNING_MESSAGE);
+                  return;
+               }
                pwd = new String(pwd_text.getPassword());
+               if(pwd.isEmpty())
+               {
+                   JOptionPane.showMessageDialog(null,"您输入的密码不能为空！","密码不能为空",JOptionPane.WARNING_MESSAGE);
+                   return;
+               }
                veri = veri_text.getText();
-               System.out.println(name);
-               System.out.println(pwd);
-               System.out.println(veri);
-               String result = captcha.getCode();
-               System.out.println(captcha.verify(veri));
+               if(veri.isEmpty())
+               {
+                   JOptionPane.showMessageDialog(null,"您输入的验证码不能为空！","验证码不能为空",JOptionPane.WARNING_MESSAGE);
+                   return;
+               }
+               sql = "select * from user where account = ?;";
+               try
+               {
+                   PreparedStatement state = connection.prepareStatement(sql);
+                   state.setString(1,name);
+                   ResultSet resultSet = state.executeQuery();
+                   if(!resultSet.next())
+                   {
+                       System.out.println("该账号不存在！");
+                       JOptionPane.showMessageDialog(null,"您输入的账号不存在！","账号不存在",JOptionPane.ERROR_MESSAGE);
+                       return;
+
+                   }
+                  if(!Objects.equals(pwd, resultSet.getString("password")))
+                  {
+                      System.out.println("输入的密码错误！");
+                      JOptionPane.showMessageDialog(null,"您输入的密码不正确！","密码错误",JOptionPane.ERROR_MESSAGE);
+                      return;
+                  }
+                   if(!captcha.verify(veri))
+                   {
+                       System.out.println("输入的验证码错误！");
+                       JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
+                       veri_update();
+                   }
+                   dispose();
+                   new UserJFrame();
+               } catch (SQLException ex)
+               {
+                   throw new RuntimeException(ex);
+               }
            }
         });
 
@@ -71,6 +123,15 @@ public class LoginJFrame extends JFrame implements MouseListener
         //设置窗口的可见性
         this.setVisible(true);
     }
+    private void connect() throws SQLException, ClassNotFoundException
+    {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String url = "jdbc:mysql://localhost:3306/library_system?useUnicode=true&characterEncoding=utf8&useSSL=true";
+        String username = "root";
+        String password = "root230817";
+        connection = DriverManager.getConnection(url, username, password);
+        statement = connection.createStatement();
+    }
     private void init()
     {
         //设置窗口的大小
@@ -80,7 +141,7 @@ public class LoginJFrame extends JFrame implements MouseListener
         //设置窗口的位置居中
         this.setLocationRelativeTo(null);
 
-        this.setLayout(new FlowLayout());
+        this.setLayout(null);
 
         //设置窗口的关闭模式
         this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
@@ -121,6 +182,7 @@ public class LoginJFrame extends JFrame implements MouseListener
 
     private void initComponent()
     {
+
         name_label.setFont(font);
         name_text.setFont(font);
         pwd_label.setFont(font);
@@ -142,28 +204,38 @@ public class LoginJFrame extends JFrame implements MouseListener
         row2.add(pwd_text);
 
         row3.add(veri_label);
-        row3.add(Box.createHorizontalStrut(35));
+        row3.add(Box.createHorizontalStrut(40));
         row3.add(veri_text);
         row3.add(Box.createHorizontalStrut(10));
         row3.add(label);
 
-        row4.add(Box.createHorizontalStrut(20));
 
+        register.setFont(new Font("宋体",Font.BOLD,30));
+        row4.add(register,BorderLayout.CENTER);
+        row4.add(Box.createHorizontalStrut(300));
 
-        row4.add(register);
-        row4.add(Box.createHorizontalStrut(30));
-
-
+        login.setFont(new Font("宋体",Font.BOLD,30));
         row4.add(login);
 
-        col.add(Box.createVerticalStrut(100));
-        title.setFont(new Font("黑体",Font.BOLD,40));
-        col.add(title);
+        title.setFont(new Font("黑体",Font.BOLD,50));
+
+
         col.add(row1);
+        col.add(Box.createVerticalStrut(10));
         col.add(row2);
+        col.add(Box.createVerticalStrut(10));
         col.add(row3);
+        col.add(Box.createVerticalStrut(30));
         col.add(row4);
 
-        this.add(col);
+        panel1.setBounds(0,0,900,300);
+        panel1.add(title,BorderLayout.CENTER);
+        this.add(panel1);
+
+        panel2.setBounds(0,300,900,400);
+        panel2.add(col);
+        this.add(panel2);
+
+
     }
 }

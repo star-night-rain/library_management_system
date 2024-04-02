@@ -1,7 +1,9 @@
 package ui;
+import java.sql.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
 
 public class RegisterJFrame extends JFrame
 {
@@ -45,7 +47,16 @@ public class RegisterJFrame extends JFrame
         return_btn.addActionListener(new ActionListener(){
            public void actionPerformed(ActionEvent e)
            {
-               new LoginJFrame();
+               try
+               {
+                   new LoginJFrame();
+               } catch (SQLException ex)
+               {
+                   throw new RuntimeException(ex);
+               } catch (ClassNotFoundException ex)
+               {
+                   throw new RuntimeException(ex);
+               }
                dispose();
            }
         });
