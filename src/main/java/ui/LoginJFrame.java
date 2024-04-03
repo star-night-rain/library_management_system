@@ -11,6 +11,7 @@ import java.util.Objects;
 
 public class LoginJFrame extends JFrame implements MouseListener
 {
+    int uid = -1;
     Connection connection;
     Statement statement;
     String sql;
@@ -92,15 +93,26 @@ public class LoginJFrame extends JFrame implements MouseListener
                       JOptionPane.showMessageDialog(null,"您输入的密码不正确！","密码错误",JOptionPane.ERROR_MESSAGE);
                       return;
                   }
-                   if(!captcha.verify(veri))
-                   {
-
-                       JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
-                       veri_update();
-                       return;
-                   }
+//                   if(!captcha.verify(veri))
+//                   {
+//
+//                       JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
+//                       veri_update();
+//                       return;
+//                   }
+                   uid = resultSet.getInt("uid");
+//                   sql = "update user set status = 1 where account = ?;";
+//                   state = connection.prepareStatement(sql);
+//                   state.setString(1,name);
+//                   state.executeUpdate();
                    dispose();
-                   new UserJFrame();
+                   try
+                   {
+                       new UserJFrame(uid);
+                   } catch (ClassNotFoundException ex)
+                   {
+                       throw new RuntimeException(ex);
+                   }
                } catch (SQLException ex)
                {
                    throw new RuntimeException(ex);

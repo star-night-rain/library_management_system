@@ -122,7 +122,7 @@ public class RegisterJFrame extends JFrame implements MouseListener
                         veri_update();
                         return;
                     }
-                    sql = "insert into user(account,password,status,max_books) values(?,?,0,10);";
+                    sql = "insert into user(account,password) values(?,?);";
                     state = connection.prepareStatement(sql);
                     state.setString(1,name);
                     state.setString(2,pwd);
