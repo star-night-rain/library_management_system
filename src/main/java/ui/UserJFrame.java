@@ -26,7 +26,7 @@ public class UserJFrame extends JFrame
     JLabel check_label3 = new JLabel("可查询图书的编号、名称、分类、作者、在馆数量等");
     JButton borrow_info_btn = new JButton("借阅信息");
     JLabel borrow_info_label = new JLabel("借阅信息");
-    JLabel borrow_label1 = new JLabel("可查询现在借阅的图书的基本信息、借阅日期、截止还书时间、超期天数等");
+    JLabel borrow_label1 = new JLabel("可查询现在借阅的图书的基本信息、借阅日期等");
     JButton borrow_hist_btn = new JButton("借阅历史");
     JLabel borrow_hist_label = new JLabel("借阅历史");
     JLabel borrow_label2 = new JLabel("可查询自己以往的借阅历史");
