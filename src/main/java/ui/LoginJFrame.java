@@ -52,92 +52,10 @@ public class LoginJFrame extends JFrame implements MouseListener
         initComponent();
         addComponent();
 
+        setLogin();
+        setRegister();
 
 
-        login.addActionListener(new ActionListener(){
-           public void actionPerformed(ActionEvent e)
-           {
-               name = name_text.getText();
-               if(name.isEmpty())
-               {
-                   JOptionPane.showMessageDialog(null,"您输入的账号不能为空！","账号不能为空",JOptionPane.WARNING_MESSAGE);
-                  return;
-               }
-               pwd = new String(pwd_text.getPassword());
-               if(pwd.isEmpty())
-               {
-                   JOptionPane.showMessageDialog(null,"您输入的密码不能为空！","密码不能为空",JOptionPane.WARNING_MESSAGE);
-                   return;
-               }
-               veri = veri_text.getText();
-               if(veri.isEmpty())
-               {
-                   JOptionPane.showMessageDialog(null,"您输入的验证码不能为空！","验证码不能为空",JOptionPane.WARNING_MESSAGE);
-                   return;
-               }
-               sql = "select * from user where account = ?;";
-               try
-               {
-                   PreparedStatement state = connection.prepareStatement(sql);
-                   state.setString(1,name);
-                   ResultSet resultSet = state.executeQuery();
-                   if(!resultSet.next())
-                   {
-                       JOptionPane.showMessageDialog(null,"您输入的账号不存在！","账号不存在",JOptionPane.ERROR_MESSAGE);
-                       return;
-
-                   }
-                  if(!Objects.equals(pwd, resultSet.getString("password")))
-                  {
-
-                      JOptionPane.showMessageDialog(null,"您输入的密码不正确！","密码错误",JOptionPane.ERROR_MESSAGE);
-                      return;
-                  }
-//                   if(!captcha.verify(veri))
-//                   {
-//
-//                       JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
-//                       veri_update();
-//                       return;
-//                   }
-                   uid = resultSet.getInt("uid");
-//                   sql = "update user set status = 1 where account = ?;";
-//                   state = connection.prepareStatement(sql);
-//                   state.setString(1,name);
-//                   state.executeUpdate();
-                   dispose();
-                   try
-                   {
-                       new UserJFrame(uid);
-                   } catch (ClassNotFoundException ex)
-                   {
-                       throw new RuntimeException(ex);
-                   }
-               } catch (SQLException ex)
-               {
-                   throw new RuntimeException(ex);
-               }
-           }
-        });
-
-        register.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
-                    new RegisterJFrame();
-                } catch (SQLException ex)
-                {
-                    throw new RuntimeException(ex);
-                } catch (ClassNotFoundException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-
-                dispose();
-            }
-        });
 
         //设置窗口的可见性
         this.setVisible(true);
@@ -255,6 +173,96 @@ public class LoginJFrame extends JFrame implements MouseListener
         panel2.add(col);
         this.add(panel2);
 
+
+    }
+    private void setLogin()
+    {
+        login.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e)
+            {
+                name = name_text.getText();
+                if(name.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"您输入的账号不能为空！","账号不能为空",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                pwd = new String(pwd_text.getPassword());
+                if(pwd.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"您输入的密码不能为空！","密码不能为空",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                veri = veri_text.getText();
+                if(veri.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"您输入的验证码不能为空！","验证码不能为空",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                sql = "select * from user where account = ?;";
+                try
+                {
+                    PreparedStatement state = connection.prepareStatement(sql);
+                    state.setString(1,name);
+                    ResultSet resultSet = state.executeQuery();
+                    if(!resultSet.next())
+                    {
+                        JOptionPane.showMessageDialog(null,"您输入的账号不存在！","账号不存在",JOptionPane.ERROR_MESSAGE);
+                        return;
+
+                    }
+                    if(!Objects.equals(pwd, resultSet.getString("password")))
+                    {
+
+                        JOptionPane.showMessageDialog(null,"您输入的密码不正确！","密码错误",JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                   if(!captcha.verify(veri))
+                   {
+
+                       JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
+                       veri_update();
+                       return;
+                   }
+                    uid = resultSet.getInt("uid");
+//                   sql = "update user set status = 1 where account = ?;";
+//                   state = connection.prepareStatement(sql);
+//                   state.setString(1,name);
+//                   state.executeUpdate();
+                    dispose();
+                    try
+                    {
+                        new UserJFrame(uid);
+                    } catch (ClassNotFoundException ex)
+                    {
+                        throw new RuntimeException(ex);
+                    }
+                } catch (SQLException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+    }
+    private void setRegister()
+    {
+        register.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                try
+                {
+                    new RegisterJFrame();
+                } catch (SQLException ex)
+                {
+                    throw new RuntimeException(ex);
+                } catch (ClassNotFoundException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+
+                dispose();
+            }
+        });
 
     }
 }

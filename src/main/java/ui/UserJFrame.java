@@ -1,9 +1,12 @@
 package ui;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
 
 
@@ -13,7 +16,7 @@ public class UserJFrame extends JFrame
     Connection connection;
     Statement statement;
     PreparedStatement state;
-    String name = "法外狂徒";
+    String name;
     JButton setting = new JButton("账号设置");
     JButton home= new JButton("系统首页");
     JButton check_btn = new JButton("图书查阅");
@@ -27,16 +30,10 @@ public class UserJFrame extends JFrame
     JButton borrow_hist_btn = new JButton("借阅历史");
     JLabel borrow_hist_label = new JLabel("借阅历史");
     JLabel borrow_label2 = new JLabel("可查询自己以往的借阅历史");
-    JPanel panel = new JPanel(new GridLayout());
     JPanel panel1 = new JPanel(new BorderLayout());
     JLabel title = new JLabel("图书馆管理系统",JLabel.CENTER);
-    JPanel rowPanel = new JPanel(new GridLayout(1,2));
     JPanel panel2 = new JPanel();
     JPanel home_panel = new JPanel();
-    JPanel check_panel = new JPanel();
-    JPanel info_panel = new JPanel();
-    JPanel his_panel = new JPanel();
-
     Box col = Box.createVerticalBox();
     Box col2 = Box.createVerticalBox();
     Box row = Box.createHorizontalBox();
@@ -69,32 +66,73 @@ public class UserJFrame extends JFrame
     JPanel panel_of_info = new JPanel();
     JScrollPane scrollPane_info;
     DefaultTableModel model_info = new DefaultTableModel();
-
+    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+    ResultSet rs;
     public UserJFrame(int id) throws SQLException, ClassNotFoundException
     {
         uid = id;
+        init();
         connect();
+        setPanel();
+        setPane2();
+
+        init_of_home();
+        init_of_check();
+        init_of_info();
+        init_of_hist();
+
+        setHome();
+        setCheck_btn();
+        setBorrow_info_btn();
+        setBorrow_hist_btn();
+
+        setBtn_of_check();
+        setSetting();
+        setBorrow_btn();
+        setReturn_btn();
+
+        this.setVisible(true);
+    }
+
+    private void init()
+    {
         this.setSize(900,700);
         this.setTitle("图书馆管理系统");
         this.setLayout(null);
         this.setLocationRelativeTo(null);
-
         this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
+    }
 
+    private void connect() throws SQLException, ClassNotFoundException
+    {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String url = "jdbc:mysql://localhost:3306/library_system?useUnicode=true&characterEncoding=utf8&useSSL=true";
+        String username = "root";
+        String password = "root230817";
+        connection = DriverManager.getConnection(url, username, password);
+        statement = connection.createStatement();
 
+        sql = "select * from user where uid = ?;";
+        state = connection.prepareStatement(sql);
+        state.setInt(1,uid);
+        ResultSet resultSet = state.executeQuery();
+        resultSet.next();
+        name = resultSet.getString("account");
+    }
+
+    private void setPanel()
+    {
         title.setFont(new Font("黑体",Font.BOLD,50));
-//        this.add(title);
-
 
         panel1.setBounds(0,0,900,150);
-
 
         panel1.add(title,BorderLayout.CENTER);
 
         panel1.setBackground(new Color(43,120,174));
         this.add(panel1);
-
-//        panel2.setBackground(new Color(176,168,185));
+    }
+    private void setPane2()
+    {
         panel2.setBounds(0,100,200,600);
 
 
@@ -139,8 +177,9 @@ public class UserJFrame extends JFrame
         panel2.add(col);
 
         this.add(panel2);
-
-//        home_panel.setBackground(new Color(254,254,223));
+    }
+    private void init_of_home()
+    {
         home_panel.setBounds(200,150,700,550);
 
         int t1 = 15,t2 = 10;
@@ -182,10 +221,14 @@ public class UserJFrame extends JFrame
 
         home_panel.add(col2);
 
-        home_panel.setVisible(false);
+//        home_panel.setVisible(false);
 
         this.add(home_panel);
 
+
+    }
+    private void init_of_check() throws SQLException
+    {
         label_of_check.setFont(font1);
         row_of_check.add(label_of_check);
         row_of_check.add(Box.createHorizontalStrut(120));
@@ -210,7 +253,7 @@ public class UserJFrame extends JFrame
         model.addColumn("出版社");
         model.addColumn("类型");
 
-        ResultSet rs = statement.executeQuery("select * from book;");
+        rs = statement.executeQuery("select * from book;");
         // 将查询结果添加到表格中
         while (rs.next()) {
             Object[] row = {
@@ -223,12 +266,11 @@ public class UserJFrame extends JFrame
             };
             model.addRow(row);
         }
-//        table_of_check.setPreferredScrollableViewportSize(new Dimension(400,200));
 
-//        // 设置表格不可编辑
-//        table_of_check.setEnabled(false);
-//        table_of_check.setCellSelectionEnabled(true); // 设置单元格可选中
 
+
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table_of_check.setDefaultRenderer(Object.class, centerRenderer);
 
         // 创建 JScrollPane 并将 JTable 添加到其中
         scrollPane = new JScrollPane(table_of_check);
@@ -249,10 +291,53 @@ public class UserJFrame extends JFrame
 
         panel_of_check.add(col_of_check);
 
-        panel_of_check.setBackground(new Color(254,254,223));
+//        panel_of_check.setBackground(new Color(254,254,223));
 
-//        this.add(panel_of_check);
+        panel_of_check.setVisible(false);
 
+        this.add(panel_of_check);
+    }
+    private void init_of_info() throws SQLException
+    {
+        table_of_info = new JTable(model_info);
+        model_info.addColumn("借阅编号");
+        model_info.addColumn("读者编号");
+        model_info.addColumn("图书编号");
+        model_info.addColumn("借阅日期");
+
+
+
+        rs = statement.executeQuery("select * from history;");
+        // 将查询结果添加到表格中
+
+        while (rs.next()) {
+            Object[] row = {
+                    rs.getInt("hid"),
+                    rs.getInt("uid"),
+                    rs.getInt("bid"),
+                    rs.getString("borrow_date")
+            };
+            model_info.addRow(row);
+        }
+
+        // 创建表格渲染器并设置居中对齐
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table_of_info.setDefaultRenderer(Object.class, centerRenderer);
+
+        scrollPane_info = new JScrollPane(table_of_info);
+        panel_of_info.setBounds(200,150,700,550);
+
+        panel_of_info.add(scrollPane_info);
+
+//        panel_of_info.setBackground(new Color(254,254,223));
+
+        panel_of_info.setVisible(false);
+
+        this.add(panel_of_info);
+
+    }
+    private void init_of_hist() throws SQLException
+    {
         table_of_hist = new JTable(model_hist);
         model_hist.addColumn("借阅编号");
         model_hist.addColumn("图书编号");
@@ -272,6 +357,12 @@ public class UserJFrame extends JFrame
             };
             model_hist.addRow(row);
         }
+
+
+
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table_of_hist.setDefaultRenderer(Object.class, centerRenderer);
+
         scrollPane_hist = new JScrollPane(table_of_hist);
         col_of_hist.add(Box.createVerticalStrut(20));
         col_of_hist.add(scrollPane_hist);
@@ -289,32 +380,15 @@ public class UserJFrame extends JFrame
 
         panel_of_hist.add(col_of_hist);
 
-        panel_of_hist.setBackground(new Color(254,254,223));
+//        panel_of_hist.setBackground(new Color(254,254,223));
 
-//        this.add(panel_of_hist);
+        panel_of_hist.setVisible(false);
 
-        table_of_info = new JTable(model_info);
-        model_info.addColumn("借阅编号");
-        model_info.addColumn("读者编号");
-        model_info.addColumn("图书编号");
-        model_info.addColumn("借阅日期");
-        model_info.addColumn("归还日期");
-        model_info.addColumn("超期天数");
+        this.add(panel_of_hist);
+    }
 
-        rs = statement.executeQuery("select * from book;");
-        // 将查询结果添加到表格中
-        while (rs.next()) {
-            Object[] row = {
-                    rs.getInt("hid"),
-                    rs.getInt("uid"),
-                    rs.getInt("bid"),
-                    rs.getString("borrow_date"),
-                    rs.getString("press"),
-                    rs.getString("type")
-            };
-            model_info.addRow(row);
-        }
-
+    private void setReturn_btn()
+    {
         return_btn.addActionListener(new ActionListener()
         {
             @Override
@@ -368,7 +442,9 @@ public class UserJFrame extends JFrame
 
             }
         });
-
+    }
+    private void setBtn_of_check()
+    {
         btn_of_check.addActionListener(new ActionListener()
         {
             @Override
@@ -383,7 +459,9 @@ public class UserJFrame extends JFrame
 
 
         });
-
+    }
+    private void setBorrow_btn()
+    {
         borrow_btn.addActionListener(new ActionListener()
         {
             @Override
@@ -450,12 +528,16 @@ public class UserJFrame extends JFrame
             }
         });
 
+    }
+
+    private void setSetting()
+    {
         setting.addActionListener(new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                System.out.println("sdf");
+//                System.out.println("sdf");
                 JTextField name1 = new JTextField(10);
                 JTextField pwd1 = new JTextField(10);
 
@@ -532,26 +614,60 @@ public class UserJFrame extends JFrame
             }
         });
 
-
-
-
-        this.setVisible(true);
     }
-
-    private void connect() throws SQLException, ClassNotFoundException
+    public void hideAll()
     {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        String url = "jdbc:mysql://localhost:3306/library_system?useUnicode=true&characterEncoding=utf8&useSSL=true";
-        String username = "root";
-        String password = "root230817";
-        connection = DriverManager.getConnection(url, username, password);
-        statement = connection.createStatement();
-
-        sql = "select * from user where uid = ?;";
-        state = connection.prepareStatement(sql);
-        state.setInt(1,uid);
-        ResultSet resultSet = state.executeQuery();
-        resultSet.next();
-        name = resultSet.getString("account");
+        home_panel.setVisible(false);
+        panel_of_check.setVisible(false);
+        panel_of_info.setVisible(false);
+        panel_of_hist.setVisible(false);
+    }
+    private void setHome()
+    {
+        home.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                hideAll();
+                home_panel.setVisible(true);
+            }
+        });
+    }
+    private void setCheck_btn()
+    {
+        check_btn.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                hideAll();
+                panel_of_check.setVisible(true);
+            }
+        });
+    }
+    private void setBorrow_info_btn()
+    {
+        borrow_info_btn.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                hideAll();
+                panel_of_info.setVisible(true);
+            }
+        });
+    }
+    private void setBorrow_hist_btn()
+    {
+        borrow_hist_btn.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                hideAll();
+                panel_of_hist.setVisible(true);
+            }
+        });
     }
 }

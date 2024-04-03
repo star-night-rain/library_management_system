@@ -6,7 +6,6 @@ import java.sql.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Objects;
 
 
 public class RegisterJFrame extends JFrame implements MouseListener
@@ -55,95 +54,11 @@ public class RegisterJFrame extends JFrame implements MouseListener
         initComponent();
         addComponent();
 
+        setReturn_btn();
+
+        setRegister();
 
 
-        return_btn.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
-                    new LoginJFrame();
-                } catch (SQLException ex)
-                {
-                    throw new RuntimeException(ex);
-                } catch (ClassNotFoundException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-                dispose();
-            }
-        });
-
-        register.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-
-                name = name_text.getText();
-                if(name.isEmpty())
-                {
-                    JOptionPane.showMessageDialog(null,"您输入的账号不能为空！","账号不能为空",JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                pwd = new String(pwd_text.getPassword());
-                if(pwd.isEmpty())
-                {
-                    JOptionPane.showMessageDialog(null,"您输入的密码不能为空！","密码不能为空",JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                pwd2 = new String(pwd_text2.getPassword());
-                if(pwd.isEmpty())
-                {
-                    JOptionPane.showMessageDialog(null,"请再次确认您的密码！","未确认密码",JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                veri = veri_text.getText();
-                if(veri.isEmpty())
-                {
-                    JOptionPane.showMessageDialog(null,"您输入的验证码不能为空！","验证码不能为空",JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                sql = "select * from user where account = ?;";
-                try
-                {
-                    PreparedStatement state = connection.prepareStatement(sql);
-                    state.setString(1,name);
-                    ResultSet resultSet = state.executeQuery();
-                    if(resultSet.next())
-                    {
-                        JOptionPane.showMessageDialog(null,"您输入的账号已存在！","该账号已存在",JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    if(!captcha.verify(veri))
-                    {
-                        JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
-                        veri_update();
-                        return;
-                    }
-                    sql = "insert into user(account,password) values(?,?);";
-                    state = connection.prepareStatement(sql);
-                    state.setString(1,name);
-                    state.setString(2,pwd);
-                    state.executeUpdate();
-
-                    JOptionPane.showMessageDialog(null,"即将返回登录界面","注册成功",JOptionPane.INFORMATION_MESSAGE);
-
-                    dispose();
-                    try
-                    {
-                        new LoginJFrame();
-                    } catch (ClassNotFoundException ex)
-                    {
-                        throw new RuntimeException(ex);
-                    }
-                } catch (SQLException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
 
         //设置窗口的可见性
         this.setVisible(true);
@@ -273,5 +188,98 @@ public class RegisterJFrame extends JFrame implements MouseListener
         panel2.setBounds(0,300,900,400);
         panel2.add(col);
         this.add(panel2);
+    }
+    private void setReturn_btn()
+    {
+        return_btn.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e)
+            {
+                try
+                {
+                    new LoginJFrame();
+                } catch (SQLException ex)
+                {
+                    throw new RuntimeException(ex);
+                } catch (ClassNotFoundException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+                dispose();
+            }
+        });
+    }
+
+    private void setRegister()
+    {
+        register.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+
+                name = name_text.getText();
+                if(name.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"您输入的账号不能为空！","账号不能为空",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                pwd = new String(pwd_text.getPassword());
+                if(pwd.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"您输入的密码不能为空！","密码不能为空",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                pwd2 = new String(pwd_text2.getPassword());
+                if(pwd.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"请再次确认您的密码！","未确认密码",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                veri = veri_text.getText();
+                if(veri.isEmpty())
+                {
+                    JOptionPane.showMessageDialog(null,"您输入的验证码不能为空！","验证码不能为空",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                sql = "select * from user where account = ?;";
+                try
+                {
+                    PreparedStatement state = connection.prepareStatement(sql);
+                    state.setString(1,name);
+                    ResultSet resultSet = state.executeQuery();
+                    if(resultSet.next())
+                    {
+                        JOptionPane.showMessageDialog(null,"您输入的账号已存在！","该账号已存在",JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    if(!captcha.verify(veri))
+                    {
+                        JOptionPane.showMessageDialog(null,"您输入的验证码不正确！","验证码错误",JOptionPane.ERROR_MESSAGE);
+                        veri_update();
+                        return;
+                    }
+                    sql = "insert into user(account,password) values(?,?);";
+                    state = connection.prepareStatement(sql);
+                    state.setString(1,name);
+                    state.setString(2,pwd);
+                    state.executeUpdate();
+
+                    JOptionPane.showMessageDialog(null,"即将返回登录界面","注册成功",JOptionPane.INFORMATION_MESSAGE);
+
+                    dispose();
+                    try
+                    {
+                        new LoginJFrame();
+                    } catch (ClassNotFoundException ex)
+                    {
+                        throw new RuntimeException(ex);
+                    }
+                } catch (SQLException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
     }
 }
