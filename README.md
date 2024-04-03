@@ -1,5 +1,5 @@
-这是本人的java课程的project——图书馆管理系统  
-文件说明：  
+# 这是本人的java课程的project——图书馆管理系统  
+## 文件说明：  
 1.Main.java是程序的主界面  
 2.LoginJFrame.java是登录界面  
 3.RegisterJFr.java是注册界面  
